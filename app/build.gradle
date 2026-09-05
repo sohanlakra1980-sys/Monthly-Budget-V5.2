@@ -1,0 +1,13 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.sohanlakra.mybudget'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.sohanlakra.mybudget'
+        minSdk 23
+        targetSdk 35
+        versionCode 52
+        versionName '5.2'
+    }
+}

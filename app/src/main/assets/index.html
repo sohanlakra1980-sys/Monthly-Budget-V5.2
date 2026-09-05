@@ -1,0 +1,77 @@
+<!doctype html><html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta charset="utf-8">
+<title>My Budget V5.2</title>
+<style>
+body{font-family:Arial;margin:0;background:#f4f6f8;color:#18212b}header{background:#1565c0;color:white;padding:17px;position:sticky;top:0;z-index:2}
+.wrap{padding:12px;max-width:800px;margin:auto}.nav{display:flex;gap:6px;overflow:auto;margin:10px 0}
+button{border:0;border-radius:9px;padding:10px 13px;background:#1565c0;color:#fff;font-weight:600}button.d{background:#c62828}button.g{background:#2e7d32}
+.card{background:#fff;border-radius:13px;padding:14px;margin:10px 0;box-shadow:0 2px 7px #0001}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:#eef4ff;padding:12px;border-radius:10px}.stat b{font-size:20px}
+input,select{box-sizing:border-box;width:100%;padding:10px;margin:5px 0 9px;border:1px solid #ccd3da;border-radius:8px}
+.row{display:flex;gap:7px;flex-wrap:wrap}.row>*{flex:1}.item{border-top:1px solid #e5e8eb;padding:11px 0}.item:first-child{border:0}
+.badge{font-size:12px;background:#e8f5e9;color:#2e7d32;border-radius:20px;padding:4px 8px}.hidden{display:none}
+canvas{width:100%;height:210px}small{color:#667}
+</style></head><body>
+<header><b>My Budget V5.2</b><br><small style="color:#dceaff">Finance Hub • Google Sheets</small></header>
+<div class="wrap"><div class="nav">
+<button onclick="tab('home')">Home</button><button onclick="tab('loans')">Loans</button><button onclick="tab('cards')">Cards</button>
+<button onclick="tab('bills')">Bills</button><button onclick="tab('history')">History</button><button onclick="tab('settings')">Settings</button></div>
+
+<section id="home"><div class="grid">
+<div class="stat">Income<br><b id="inc">₹0</b></div><div class="stat">Expenses<br><b id="exp">₹0</b></div>
+<div class="stat">Balance<br><b id="bal">₹0</b></div><div class="stat">EMI + Bills<br><b id="commit">₹0</b></div></div>
+<div class="card"><h3>Monthly spending by category</h3><canvas id="chart" width="700" height="210"></canvas></div>
+<div class="card"><h3>Add Expense</h3><form onsubmit="expense(event)">
+<input id="ec" placeholder="Category" required><input id="ea" type="number" step=".01" placeholder="Amount" required><input id="ed" placeholder="Description">
+<button>Add Expense</button></form></div></section>
+
+<section id="loans" class="hidden"><div class="card"><h2>Loans</h2><form onsubmit="loan(event)">
+<input type="hidden" id="li"><input id="ln" placeholder="Name — Personal Loan 1 / Home Loan" required><input id="lt" placeholder="Type">
+<input id="lp" type="number" step=".01" placeholder="Principal"><input id="lr" type="number" step=".01" placeholder="Annual rate %">
+<input id="lm" type="number" placeholder="Tenure months"><input id="le" type="number" step=".01" placeholder="EMI">
+<input id="ls" type="date"><select id="lx"><option>Active</option><option>Closed</option></select><button>Save Loan</button></form></div><div id="lo"></div></section>
+
+<section id="cards" class="hidden"><div class="card"><h2>Credit Cards</h2><form onsubmit="card(event)">
+<input type="hidden" id="ci"><input id="cn" placeholder="Card name" required><input id="cb" placeholder="Bank"><input id="c4" maxlength="4" placeholder="Last 4 digits">
+<input id="cl" type="number" step=".01" placeholder="Credit limit"><input id="cs" type="number" placeholder="Statement day"><input id="cd" type="number" placeholder="Due day">
+<select id="cx"><option>Active</option><option>Closed</option></select><button>Save Card</button></form></div><div id="ca"></div></section>
+
+<section id="bills" class="hidden"><div class="card"><h2>Bills & Recurring</h2><form onsubmit="bill(event)">
+<input type="hidden" id="bi"><input id="bn" placeholder="Electricity - Home / Office / Mobile 1" required><input id="bt" placeholder="Type">
+<input id="bp" placeholder="Provider"><input id="ba" type="number" step=".01" placeholder="Amount"><input id="bd" type="number" placeholder="Due day">
+<select id="bf"><option>Monthly</option><option>Quarterly</option><option>Yearly</option></select><select id="bx"><option>Active</option><option>Closed</option></select>
+<label><input id="bc" type="checkbox" checked> Auto carry-forward</label><br><button>Save Bill</button></form></div><div id="bl"></div></section>
+
+<section id="history" class="hidden"><div class="card"><h2>Payment History</h2><div id="hi"></div></div></section>
+
+<section id="settings" class="hidden"><div class="card"><h2>Google Sheets Sync</h2>
+<input id="url" placeholder="Apps Script /exec URL"><div class="row"><button onclick="saveurl()">Save URL</button><button onclick="setup()">Create/Repair Sheets</button><button onclick="sync()">Sync Now</button></div>
+<p id="msg"><small>Not connected.</small></p></div>
+<div class="card"><h3>Local Backup</h3><button onclick="backup()">Export</button> <button onclick="restore()">Import</button></div></section>
+</div><script>
+const K='mybudget-v5-2-data',A='mybudget-v5-2-api';
+let db=JSON.parse(localStorage.getItem(K)||'{"loans":[],"cards":[],"bills":[],"loanPayments":[],"cardPayments":[],"billPayments":[],"tx":[],"income":[]}');
+const $=x=>document.getElementById(x), money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2}), uid=p=>p+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+function save(){localStorage.setItem(K,JSON.stringify(db));render()} function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function tab(x){document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));$(x).classList.remove('hidden');render()}
+function expense(e){e.preventDefault();let r={id:uid('ex'),date:new Date().toISOString().slice(0,10),category:$('ec').value,description:$('ed').value,amount:+$('ea').value,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};db.tx.push(r);save();cloud('Expenses',r);e.target.reset()}
+function loan(e){e.preventDefault();let r={id:$('li').value||uid('loan'),name:$('ln').value,type:$('lt').value,principal:+$('lp').value||0,annualRate:+$('lr').value||0,tenureMonths:+$('lm').value||0,emi:+$('le').value||0,startDate:$('ls').value,status:$('lx').value,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.loans,r);save();cloud('Loans',r);e.target.reset();$('li').value=''}
+function card(e){e.preventDefault();let r={id:$('ci').value||uid('card'),name:$('cn').value,bank:$('cb').value,last4:$('c4').value,creditLimit:+$('cl').value||0,statementDay:+$('cs').value||0,dueDay:+$('cd').value||0,status:$('cx').value,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.cards,r);save();cloud('CreditCards',r);e.target.reset();$('ci').value=''}
+function bill(e){e.preventDefault();let r={id:$('bi').value||uid('bill'),name:$('bn').value,type:$('bt').value,provider:$('bp').value,amount:+$('ba').value||0,dueDay:+$('bd').value||0,frequency:$('bf').value,status:$('bx').value,autoCarryForward:$('bc').checked,notes:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.bills,r);save();cloud('Bills',r);e.target.reset();$('bi').value=''}
+function up(a,r){let i=a.findIndex(x=>x.id===r.id);i<0?a.push(r):a[i]=r}
+function remove(sheet,a,id){if(confirm('Delete this item?')){db[a]=db[a].filter(x=>x.id!==id);save();delcloud(sheet,id)}}
+function pay(kind,r){let v=prompt('Payment amount',kind==='loan'?r.emi:r.amount);if(!v)return;let x={id:uid(kind+'pay'),date:new Date().toISOString().slice(0,10),amount:+v,[kind+'Id']:r.id,paymentMode:'Other',notes:''};let a=kind==='loan'?'loanPayments':kind==='card'?'cardPayments':'billPayments';db[a].push(x);save();cloud(kind==='loan'?'LoanPayments':kind==='card'?'CardPayments':'BillPayments',x)}
+function render(){let e=db.tx.reduce((a,x)=>a+(+x.amount||0),0),i=db.income.reduce((a,x)=>a+(+x.amount||0),0);$('inc').textContent=money(i);$('exp').textContent=money(e);$('bal').textContent=money(i-e);$('commit').textContent=money(db.loans.filter(x=>x.status==='Active').reduce((a,x)=>a+(+x.emi||0),0)+db.bills.filter(x=>x.status==='Active').reduce((a,x)=>a+(+x.amount||0),0));$('lo').innerHTML=db.loans.map(r=>`<div class="card item"><b>${esc(r.name)}</b> <span class="badge">${esc(r.status)}</span><br><small>${esc(r.type)} • Principal ${money(r.principal)} • EMI ${money(r.emi)}</small><div class="row"><button onclick="pay('loan',db.loans.find(x=>x.id=='${r.id}'))">Pay EMI</button><button class="d" onclick="remove('Loans','loans','${r.id}')">Delete</button></div></div>`).join('')||'<div class="card">No loans.</div>';
+$('ca').innerHTML=db.cards.map(r=>`<div class="card item"><b>${esc(r.name)}</b> <span class="badge">${esc(r.status)}</span><br><small>${esc(r.bank)} • ****${esc(r.last4)} • Limit ${money(r.creditLimit)} • Due ${r.dueDay||'-'}</small><div class="row"><button onclick="pay('card',db.cards.find(x=>x.id=='${r.id}'))">Pay Card</button><button class="d" onclick="remove('CreditCards','cards','${r.id}')">Delete</button></div></div>`).join('')||'<div class="card">No cards.</div>';
+$('bl').innerHTML=db.bills.map(r=>`<div class="card item"><b>${esc(r.name)}</b> <span class="badge">${esc(r.status)}</span><br><small>${esc(r.type)} • ${esc(r.provider)} • ${money(r.amount)} • Due ${r.dueDay||'-'}</small><div class="row"><button onclick="pay('bill',db.bills.find(x=>x.id=='${r.id}'))">Mark Paid</button><button class="d" onclick="remove('Bills','bills','${r.id}')">Delete</button></div></div>`).join('')||'<div class="card">No bills.</div>';
+let h=[...db.tx.map(x=>({...x,t:'Expense'})),...db.loanPayments.map(x=>({...x,t:'Loan'})),...db.cardPayments.map(x=>({...x,t:'Card'})),...db.billPayments.map(x=>({...x,t:'Bill'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date)));$('hi').innerHTML=h.map(x=>`<div class="item"><b>${x.t}</b> • ${x.date}<br>${money(x.amount)}</div>`).join('')||'No history.';draw()}
+function draw(){let c=$('chart'),x=c.getContext('2d'),w=c.width,h=c.height;x.clearRect(0,0,w,h);let m={};db.tx.forEach(r=>m[r.category]=(m[r.category]||0)+(+r.amount||0));let v=Object.entries(m).slice(0,8),mx=Math.max(1,...v.map(a=>a[1])),bw=w/(v.length||1)*.6;v.forEach((a,i)=>{let bh=a[1]/mx*(h-50),px=i*w/(v.length||1)+bw*.3;x.fillStyle='#1565c0';x.fillRect(px,h-30-bh,bw,bh);x.fillStyle='#18212b';x.font='12px Arial';x.fillText(a[0].slice(0,11),px,h-10)})}
+function api(){return localStorage.getItem(A)||$('url').value.trim()} function saveurl(){localStorage.setItem(A,$('url').value.trim());$('msg').textContent='URL saved.'}
+function req(p){return new Promise((res,rej)=>{let u=api();if(!u)return rej(Error('Save the /exec URL first'));let cb='cb'+Date.now()+Math.random().toString(36).slice(2);window[cb]=r=>{delete window[cb];res(JSON.parse(r))};AndroidBridge.post(u,JSON.stringify(p),cb);setTimeout(()=>{if(window[cb]){delete window[cb];rej(Error('Request timed out'))}},35000)})}
+async function setup(){try{$('msg').textContent='Creating/repairing sheets...';let r=await req({action:'setup'});$('msg').textContent=r.ok?'Sheets are ready.':'Error: '+r.error}catch(e){$('msg').textContent=e.message}}
+async function sync(){try{$('msg').textContent='Syncing...';let r=await req({action:'listAll'});if(!r.ok)throw Error(r.error);let d=r.data||{};db.tx=d.Expenses||[];db.income=d.Income||[];db.loans=d.Loans||[];db.loanPayments=d.LoanPayments||[];db.cards=d.CreditCards||[];db.cardPayments=d.CardPayments||[];db.bills=d.Bills||[];db.billPayments=d.BillPayments||[];save();$('msg').textContent='Sync successful.'}catch(e){$('msg').textContent='Sync error: '+e.message}}
+async function cloud(sheet,r){if(!api())return;try{await req({action:'upsert',sheet,record:r})}catch(e){console.log(e)}} async function delcloud(sheet,id){if(!api())return;try{await req({action:'delete',sheet,id})}catch(e){console.log(e)}}
+function backup(){let b=new Blob([JSON.stringify(db)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mybudget-v5-2-backup.json';a.click()}
+function restore(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let r=new FileReader();r.onload=()=>{db=JSON.parse(r.result);save()};r.readAsText(i.files[0])};i.click()}
+$('url').value=localStorage.getItem(A)||'';render();
+</script></body></html>
