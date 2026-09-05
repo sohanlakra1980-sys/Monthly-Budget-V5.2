@@ -1,77 +1,130 @@
-<!doctype html><html><head>
-<meta name="viewport" content="width=device-width,initial-scale=1"><meta charset="utf-8">
-<title>My Budget V5.2</title>
+<!doctype html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Budget V5.2.1</title>
 <style>
-body{font-family:Arial;margin:0;background:#f4f6f8;color:#18212b}header{background:#1565c0;color:white;padding:17px;position:sticky;top:0;z-index:2}
-.wrap{padding:12px;max-width:800px;margin:auto}.nav{display:flex;gap:6px;overflow:auto;margin:10px 0}
-button{border:0;border-radius:9px;padding:10px 13px;background:#1565c0;color:#fff;font-weight:600}button.d{background:#c62828}button.g{background:#2e7d32}
-.card{background:#fff;border-radius:13px;padding:14px;margin:10px 0;box-shadow:0 2px 7px #0001}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.stat{background:#eef4ff;padding:12px;border-radius:10px}.stat b{font-size:20px}
-input,select{box-sizing:border-box;width:100%;padding:10px;margin:5px 0 9px;border:1px solid #ccd3da;border-radius:8px}
-.row{display:flex;gap:7px;flex-wrap:wrap}.row>*{flex:1}.item{border-top:1px solid #e5e8eb;padding:11px 0}.item:first-child{border:0}
-.badge{font-size:12px;background:#e8f5e9;color:#2e7d32;border-radius:20px;padding:4px 8px}.hidden{display:none}
-canvas{width:100%;height:210px}small{color:#667}
-</style></head><body>
-<header><b>My Budget V5.2</b><br><small style="color:#dceaff">Finance Hub • Google Sheets</small></header>
-<div class="wrap"><div class="nav">
-<button onclick="tab('home')">Home</button><button onclick="tab('loans')">Loans</button><button onclick="tab('cards')">Cards</button>
-<button onclick="tab('bills')">Bills</button><button onclick="tab('history')">History</button><button onclick="tab('settings')">Settings</button></div>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6f8;color:#18212b}
+header{background:#1565c0;color:#fff;padding:16px 16px 13px;position:sticky;top:0;z-index:20}
+header h1{font-size:22px;margin:0 0 4px}header small{color:#dceaff}
+.nav{position:sticky;top:67px;z-index:19;background:#fff;border-bottom:1px solid #dfe4e8;padding:8px 8px;display:flex;gap:7px;overflow-x:auto;white-space:nowrap}
+.nav button{flex:0 0 auto}
+button{border:0;border-radius:9px;padding:10px 13px;background:#1565c0;color:#fff;font-weight:700}
+button.g{background:#2e7d32}button.d{background:#c62828}button.s{background:#607d8b}
+.wrap{max-width:850px;margin:auto;padding:10px 12px 30px}.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#eef4ff;border-radius:12px;padding:13px}.stat b{display:block;font-size:20px;margin-top:4px}
+.card{background:#fff;border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 2px 8px #00000012}
+input,select,textarea{width:100%;padding:11px;margin:5px 0 9px;border:1px solid #cfd6dd;border-radius:9px;background:#fff;font-size:15px}
+.row{display:flex;gap:7px;flex-wrap:wrap}.row button{flex:1;min-width:95px}
+.item{border-top:1px solid #e5e9ed;padding:12px 0}.item:first-child{border-top:0}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#e8f5e9;color:#2e7d32;font-size:12px}
+.badge.closed{background:#eceff1;color:#546e7a}.muted{color:#687681;font-size:13px}.ok{color:#2e7d32}.err{color:#c62828}
+canvas{width:100%;height:220px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:8px}
+label.check{display:flex;gap:8px;align-items:center;margin:4px 0 10px}.check input{width:auto;margin:0}
+</style></head>
+<body>
+<header><h1>My Budget V5.2.1</h1><small>Finance Hub • Google Sheets</small></header>
+<nav class="nav">
+<button onclick="tab('home')">Home</button><button onclick="tab('income')">Income</button><button onclick="tab('expense')">Expense</button>
+<button onclick="tab('loans')">Loans</button><button onclick="tab('cards')">Cards</button><button onclick="tab('bills')">Bills</button>
+<button onclick="tab('history')">History</button><button onclick="tab('settings')">Settings</button>
+</nav>
+<div class="wrap">
 
-<section id="home"><div class="grid">
-<div class="stat">Income<br><b id="inc">₹0</b></div><div class="stat">Expenses<br><b id="exp">₹0</b></div>
-<div class="stat">Balance<br><b id="bal">₹0</b></div><div class="stat">EMI + Bills<br><b id="commit">₹0</b></div></div>
-<div class="card"><h3>Monthly spending by category</h3><canvas id="chart" width="700" height="210"></canvas></div>
-<div class="card"><h3>Add Expense</h3><form onsubmit="expense(event)">
-<input id="ec" placeholder="Category" required><input id="ea" type="number" step=".01" placeholder="Amount" required><input id="ed" placeholder="Description">
-<button>Add Expense</button></form></div></section>
+<section id="home">
+<div class="grid">
+<div class="stat">Income<b id="inc">₹0</b></div><div class="stat">Expenses<b id="exp">₹0</b></div>
+<div class="stat">Balance<b id="bal">₹0</b></div><div class="stat">EMI + Bills<b id="commit">₹0</b></div>
+</div>
+<div class="card"><div class="section-title"><h3>Monthly spending</h3><span class="muted" id="monthlabel"></span></div><canvas id="chart" width="800" height="220"></canvas></div>
+<div class="card"><h3>Quick Expense</h3><form onsubmit="expense(event)">
+<input id="ec" placeholder="Category e.g. Groceries" required><input id="ea" type="number" step=".01" placeholder="Amount" required>
+<input id="ed" placeholder="Description"><select id="ep"><option>Cash</option><option>UPI</option><option>Debit Card</option><option>Credit Card</option><option>Bank Transfer</option><option>Other</option></select>
+<button>Add Expense</button></form></div>
+</section>
+
+<section id="income" class="hidden"><div class="card"><h2>Add Income</h2><form onsubmit="income(event)">
+<input id="isource" placeholder="Source e.g. Salary" required><input id="iamt" type="number" step=".01" placeholder="Amount" required>
+<input id="idesc" placeholder="Description"><input id="idate" type="date"><button>Add Income</button></form></div></section>
+
+<section id="expense" class="hidden"><div class="card"><h2>Add Expense</h2><form onsubmit="expense(event)">
+<input id="ec2" placeholder="Category" required><input id="ea2" type="number" step=".01" placeholder="Amount" required><input id="ed2" placeholder="Description">
+<select id="ep2"><option>Cash</option><option>UPI</option><option>Debit Card</option><option>Credit Card</option><option>Bank Transfer</option><option>Other</option></select>
+<input id="edate2" type="date"><button>Add Expense</button></form></div></section>
 
 <section id="loans" class="hidden"><div class="card"><h2>Loans</h2><form onsubmit="loan(event)">
-<input type="hidden" id="li"><input id="ln" placeholder="Name — Personal Loan 1 / Home Loan" required><input id="lt" placeholder="Type">
-<input id="lp" type="number" step=".01" placeholder="Principal"><input id="lr" type="number" step=".01" placeholder="Annual rate %">
+<input type="hidden" id="li"><input id="ln" placeholder="Loan name — Personal Loan 1 / Home Loan" required><input id="lt" placeholder="Type">
+<input id="lp" type="number" step=".01" placeholder="Principal"><input id="lr" type="number" step=".01" placeholder="Annual interest %">
 <input id="lm" type="number" placeholder="Tenure months"><input id="le" type="number" step=".01" placeholder="EMI">
-<input id="ls" type="date"><select id="lx"><option>Active</option><option>Closed</option></select><button>Save Loan</button></form></div><div id="lo"></div></section>
+<input id="ls" type="date"><select id="lx"><option>Active</option><option>Closed</option></select>
+<div class="row"><button>Save Loan</button><button type="button" class="s" onclick="clearLoan()">Clear</button></div></form></div><div id="lo"></div></section>
 
 <section id="cards" class="hidden"><div class="card"><h2>Credit Cards</h2><form onsubmit="card(event)">
 <input type="hidden" id="ci"><input id="cn" placeholder="Card name" required><input id="cb" placeholder="Bank"><input id="c4" maxlength="4" placeholder="Last 4 digits">
-<input id="cl" type="number" step=".01" placeholder="Credit limit"><input id="cs" type="number" placeholder="Statement day"><input id="cd" type="number" placeholder="Due day">
-<select id="cx"><option>Active</option><option>Closed</option></select><button>Save Card</button></form></div><div id="ca"></div></section>
+<input id="cl" type="number" step=".01" placeholder="Credit limit"><input id="cs" type="number" min="1" max="31" placeholder="Statement day"><input id="cd" type="number" min="1" max="31" placeholder="Due day">
+<select id="cx"><option>Active</option><option>Closed</option></select><div class="row"><button>Save Card</button><button type="button" class="s" onclick="clearCard()">Clear</button></div>
+</form></div><div id="ca"></div></section>
 
 <section id="bills" class="hidden"><div class="card"><h2>Bills & Recurring</h2><form onsubmit="bill(event)">
 <input type="hidden" id="bi"><input id="bn" placeholder="Electricity - Home / Office / Mobile 1" required><input id="bt" placeholder="Type">
-<input id="bp" placeholder="Provider"><input id="ba" type="number" step=".01" placeholder="Amount"><input id="bd" type="number" placeholder="Due day">
+<input id="bp" placeholder="Provider"><input id="ba" type="number" step=".01" placeholder="Amount"><input id="bd" type="number" min="1" max="31" placeholder="Due day">
 <select id="bf"><option>Monthly</option><option>Quarterly</option><option>Yearly</option></select><select id="bx"><option>Active</option><option>Closed</option></select>
-<label><input id="bc" type="checkbox" checked> Auto carry-forward</label><br><button>Save Bill</button></form></div><div id="bl"></div></section>
+<label class="check"><input id="bc" type="checkbox" checked> Auto carry-forward</label>
+<div class="row"><button>Save Bill</button><button type="button" class="s" onclick="clearBill()">Clear</button></div></form></div><div id="bl"></div></section>
 
-<section id="history" class="hidden"><div class="card"><h2>Payment History</h2><div id="hi"></div></div></section>
+<section id="history" class="hidden"><div class="card"><h2>Payment & Expense History</h2><div id="hi"></div></div></section>
 
 <section id="settings" class="hidden"><div class="card"><h2>Google Sheets Sync</h2>
-<input id="url" placeholder="Apps Script /exec URL"><div class="row"><button onclick="saveurl()">Save URL</button><button onclick="setup()">Create/Repair Sheets</button><button onclick="sync()">Sync Now</button></div>
-<p id="msg"><small>Not connected.</small></p></div>
-<div class="card"><h3>Local Backup</h3><button onclick="backup()">Export</button> <button onclick="restore()">Import</button></div></section>
-</div><script>
+<p class="muted">Paste the Apps Script Web App URL ending in <b>/exec</b>.</p>
+<input id="url" placeholder="https://script.google.com/macros/s/.../exec">
+<div class="row"><button onclick="saveurl()">Save URL</button><button onclick="setup()">Create/Repair Sheets</button><button onclick="sync()">Sync Now</button></div>
+<p id="msg" class="muted">Not connected.</p></div>
+<div class="card"><h3>Monthly Carry-forward</h3><p class="muted">Creates next-month bill instances only once for active bills marked for auto carry-forward.</p><button onclick="carry()">Carry Forward Active Bills</button></div>
+<div class="card"><h3>Local Backup</h3><button onclick="backup()">Export Backup</button> <button class="s" onclick="restore()">Import Backup</button></div></section>
+</div>
+
+<script>
 const K='mybudget-v5-2-data',A='mybudget-v5-2-api';
 let db=JSON.parse(localStorage.getItem(K)||'{"loans":[],"cards":[],"bills":[],"loanPayments":[],"cardPayments":[],"billPayments":[],"tx":[],"income":[]}');
-const $=x=>document.getElementById(x), money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2}), uid=p=>p+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
-function save(){localStorage.setItem(K,JSON.stringify(db));render()} function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+const $=id=>document.getElementById(id), money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2}), uid=p=>p+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+const today=()=>new Date().toISOString().slice(0,10);
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function save(){localStorage.setItem(K,JSON.stringify(db));render()}
 function tab(x){document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));$(x).classList.remove('hidden');render()}
-function expense(e){e.preventDefault();let r={id:uid('ex'),date:new Date().toISOString().slice(0,10),category:$('ec').value,description:$('ed').value,amount:+$('ea').value,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};db.tx.push(r);save();cloud('Expenses',r);e.target.reset()}
-function loan(e){e.preventDefault();let r={id:$('li').value||uid('loan'),name:$('ln').value,type:$('lt').value,principal:+$('lp').value||0,annualRate:+$('lr').value||0,tenureMonths:+$('lm').value||0,emi:+$('le').value||0,startDate:$('ls').value,status:$('lx').value,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.loans,r);save();cloud('Loans',r);e.target.reset();$('li').value=''}
-function card(e){e.preventDefault();let r={id:$('ci').value||uid('card'),name:$('cn').value,bank:$('cb').value,last4:$('c4').value,creditLimit:+$('cl').value||0,statementDay:+$('cs').value||0,dueDay:+$('cd').value||0,status:$('cx').value,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.cards,r);save();cloud('CreditCards',r);e.target.reset();$('ci').value=''}
-function bill(e){e.preventDefault();let r={id:$('bi').value||uid('bill'),name:$('bn').value,type:$('bt').value,provider:$('bp').value,amount:+$('ba').value||0,dueDay:+$('bd').value||0,frequency:$('bf').value,status:$('bx').value,autoCarryForward:$('bc').checked,notes:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.bills,r);save();cloud('Bills',r);e.target.reset();$('bi').value=''}
 function up(a,r){let i=a.findIndex(x=>x.id===r.id);i<0?a.push(r):a[i]=r}
+function expense(e){e.preventDefault();let p=$('ec')?.value?['ec','ea','ed','ep','edate']:['ec2','ea2','ed2','ep2','edate2'];let r={id:uid('ex'),date:$(p[4]).value||today(),category:$(p[0]).value,description:$(p[2]).value,amount:+$(p[1]).value,paymentMode:$(p[3]).value,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};db.tx.push(r);save();cloud('Expenses',r);e.target.reset()}
+function income(e){e.preventDefault();let r={id:uid('in'),date:$('idate').value||today(),source:$('isource').value,description:$('idesc').value,amount:+$('iamt').value,notes:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};db.income.push(r);save();cloud('Income',r);e.target.reset()}
+function loan(e){e.preventDefault();let r={id:$('li').value||uid('loan'),name:$('ln').value,type:$('lt').value,principal:+$('lp').value||0,annualRate:+$('lr').value||0,tenureMonths:+$('lm').value||0,emi:+$('le').value||0,startDate:$('ls').value,status:$('lx').value,notes:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.loans,r);save();cloud('Loans',r);clearLoan()}
+function card(e){e.preventDefault();let r={id:$('ci').value||uid('card'),name:$('cn').value,bank:$('cb').value,last4:$('c4').value,creditLimit:+$('cl').value||0,statementDay:+$('cs').value||0,dueDay:+$('cd').value||0,status:$('cx').value,notes:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.cards,r);save();cloud('CreditCards',r);clearCard()}
+function bill(e){e.preventDefault();let r={id:$('bi').value||uid('bill'),name:$('bn').value,type:$('bt').value,provider:$('bp').value,amount:+$('ba').value||0,dueDay:+$('bd').value||0,frequency:$('bf').value,status:$('bx').value,autoCarryForward:$('bc').checked,notes:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};up(db.bills,r);save();cloud('Bills',r);clearBill()}
+function clearLoan(){$('li').value='';['ln','lt','lp','lr','lm','le','ls'].forEach(x=>$(x).value='');$('lx').value='Active'}
+function clearCard(){$('ci').value='';['cn','cb','c4','cl','cs','cd'].forEach(x=>$(x).value='');$('cx').value='Active'}
+function clearBill(){$('bi').value='';['bn','bt','bp','ba','bd'].forEach(x=>$(x).value='');$('bf').value='Monthly';$('bx').value='Active';$('bc').checked=true}
+function editLoan(r){$('li').value=r.id;$('ln').value=r.name;$('lt').value=r.type;$('lp').value=r.principal;$('lr').value=r.annualRate;$('lm').value=r.tenureMonths;$('le').value=r.emi;$('ls').value=r.startDate||'';$('lx').value=r.status;tab('loans');scrollTo(0,0)}
+function editCard(r){$('ci').value=r.id;$('cn').value=r.name;$('cb').value=r.bank;$('c4').value=r.last4;$('cl').value=r.creditLimit;$('cs').value=r.statementDay;$('cd').value=r.dueDay;$('cx').value=r.status;tab('cards');scrollTo(0,0)}
+function editBill(r){$('bi').value=r.id;$('bn').value=r.name;$('bt').value=r.type;$('bp').value=r.provider;$('ba').value=r.amount;$('bd').value=r.dueDay;$('bf').value=r.frequency;$('bx').value=r.status;$('bc').checked=!!r.autoCarryForward;tab('bills');scrollTo(0,0)}
+function closeItem(sheet,a,id){let r=db[a].find(x=>x.id===id);if(!r)return;r.status='Closed';r.updatedAt=new Date().toISOString();save();cloud(sheet,r)}
 function remove(sheet,a,id){if(confirm('Delete this item?')){db[a]=db[a].filter(x=>x.id!==id);save();delcloud(sheet,id)}}
-function pay(kind,r){let v=prompt('Payment amount',kind==='loan'?r.emi:r.amount);if(!v)return;let x={id:uid(kind+'pay'),date:new Date().toISOString().slice(0,10),amount:+v,[kind+'Id']:r.id,paymentMode:'Other',notes:''};let a=kind==='loan'?'loanPayments':kind==='card'?'cardPayments':'billPayments';db[a].push(x);save();cloud(kind==='loan'?'LoanPayments':kind==='card'?'CardPayments':'BillPayments',x)}
-function render(){let e=db.tx.reduce((a,x)=>a+(+x.amount||0),0),i=db.income.reduce((a,x)=>a+(+x.amount||0),0);$('inc').textContent=money(i);$('exp').textContent=money(e);$('bal').textContent=money(i-e);$('commit').textContent=money(db.loans.filter(x=>x.status==='Active').reduce((a,x)=>a+(+x.emi||0),0)+db.bills.filter(x=>x.status==='Active').reduce((a,x)=>a+(+x.amount||0),0));$('lo').innerHTML=db.loans.map(r=>`<div class="card item"><b>${esc(r.name)}</b> <span class="badge">${esc(r.status)}</span><br><small>${esc(r.type)} • Principal ${money(r.principal)} • EMI ${money(r.emi)}</small><div class="row"><button onclick="pay('loan',db.loans.find(x=>x.id=='${r.id}'))">Pay EMI</button><button class="d" onclick="remove('Loans','loans','${r.id}')">Delete</button></div></div>`).join('')||'<div class="card">No loans.</div>';
-$('ca').innerHTML=db.cards.map(r=>`<div class="card item"><b>${esc(r.name)}</b> <span class="badge">${esc(r.status)}</span><br><small>${esc(r.bank)} • ****${esc(r.last4)} • Limit ${money(r.creditLimit)} • Due ${r.dueDay||'-'}</small><div class="row"><button onclick="pay('card',db.cards.find(x=>x.id=='${r.id}'))">Pay Card</button><button class="d" onclick="remove('CreditCards','cards','${r.id}')">Delete</button></div></div>`).join('')||'<div class="card">No cards.</div>';
-$('bl').innerHTML=db.bills.map(r=>`<div class="card item"><b>${esc(r.name)}</b> <span class="badge">${esc(r.status)}</span><br><small>${esc(r.type)} • ${esc(r.provider)} • ${money(r.amount)} • Due ${r.dueDay||'-'}</small><div class="row"><button onclick="pay('bill',db.bills.find(x=>x.id=='${r.id}'))">Mark Paid</button><button class="d" onclick="remove('Bills','bills','${r.id}')">Delete</button></div></div>`).join('')||'<div class="card">No bills.</div>';
-let h=[...db.tx.map(x=>({...x,t:'Expense'})),...db.loanPayments.map(x=>({...x,t:'Loan'})),...db.cardPayments.map(x=>({...x,t:'Card'})),...db.billPayments.map(x=>({...x,t:'Bill'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date)));$('hi').innerHTML=h.map(x=>`<div class="item"><b>${x.t}</b> • ${x.date}<br>${money(x.amount)}</div>`).join('')||'No history.';draw()}
-function draw(){let c=$('chart'),x=c.getContext('2d'),w=c.width,h=c.height;x.clearRect(0,0,w,h);let m={};db.tx.forEach(r=>m[r.category]=(m[r.category]||0)+(+r.amount||0));let v=Object.entries(m).slice(0,8),mx=Math.max(1,...v.map(a=>a[1])),bw=w/(v.length||1)*.6;v.forEach((a,i)=>{let bh=a[1]/mx*(h-50),px=i*w/(v.length||1)+bw*.3;x.fillStyle='#1565c0';x.fillRect(px,h-30-bh,bw,bh);x.fillStyle='#18212b';x.font='12px Arial';x.fillText(a[0].slice(0,11),px,h-10)})}
-function api(){return localStorage.getItem(A)||$('url').value.trim()} function saveurl(){localStorage.setItem(A,$('url').value.trim());$('msg').textContent='URL saved.'}
-function req(p){return new Promise((res,rej)=>{let u=api();if(!u)return rej(Error('Save the /exec URL first'));let cb='cb'+Date.now()+Math.random().toString(36).slice(2);window[cb]=r=>{delete window[cb];res(JSON.parse(r))};AndroidBridge.post(u,JSON.stringify(p),cb);setTimeout(()=>{if(window[cb]){delete window[cb];rej(Error('Request timed out'))}},35000)})}
-async function setup(){try{$('msg').textContent='Creating/repairing sheets...';let r=await req({action:'setup'});$('msg').textContent=r.ok?'Sheets are ready.':'Error: '+r.error}catch(e){$('msg').textContent=e.message}}
+function pay(kind,r){let v=prompt('Payment amount',kind==='loan'?r.emi:r.amount);if(!v)return;let x={id:uid(kind+'pay'),date:today(),amount:+v,[kind+'Id']:r.id,paymentMode:'Other',notes:''};let a=kind==='loan'?'loanPayments':kind==='card'?'cardPayments':'billPayments';let sh=kind==='loan'?'LoanPayments':kind==='card'?'CardPayments':'BillPayments';db[a].push(x);save();cloud(sh,x)}
+function render(){
+ let e=db.tx.reduce((a,x)=>a+(+x.amount||0),0),i=db.income.reduce((a,x)=>a+(+x.amount||0),0);
+ $('inc').textContent=money(i);$('exp').textContent=money(e);$('bal').textContent=money(i-e);
+ $('commit').textContent=money(db.loans.filter(x=>x.status==='Active').reduce((a,x)=>a+(+x.emi||0),0)+db.bills.filter(x=>x.status==='Active').reduce((a,x)=>a+(+x.amount||0),0));
+ $('monthlabel').textContent=new Date().toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+ $('lo').innerHTML=db.loans.map(r=>`<div class="item"><b>${esc(r.name)}</b> <span class="badge ${r.status==='Closed'?'closed':''}">${esc(r.status)}</span><br><span class="muted">${esc(r.type)} • Principal ${money(r.principal)} • EMI ${money(r.emi)}</span><div class="row"><button onclick='editLoan(${JSON.stringify(r)})'>Edit</button><button class="g" onclick='pay("loan",db.loans.find(x=>x.id=="${r.id}"))'>Pay EMI</button>${r.status==='Active'?`<button class="s" onclick='closeItem("Loans","loans","${r.id}")'>Close</button>`:''}<button class="d" onclick='remove("Loans","loans","${r.id}")'>Delete</button></div></div>`).join('')||'<p class="muted">No loans.</p>';
+ $('ca').innerHTML=db.cards.map(r=>`<div class="item"><b>${esc(r.name)}</b> <span class="badge ${r.status==='Closed'?'closed':''}">${esc(r.status)}</span><br><span class="muted">${esc(r.bank)} • ****${esc(r.last4)} • Limit ${money(r.creditLimit)} • Due ${r.dueDay||'-'}</span><div class="row"><button onclick='editCard(${JSON.stringify(r)})'>Edit</button><button class="g" onclick='pay("card",db.cards.find(x=>x.id=="${r.id}"))'>Pay</button>${r.status==='Active'?`<button class="s" onclick='closeItem("CreditCards","cards","${r.id}")'>Close</button>`:''}<button class="d" onclick='remove("CreditCards","cards","${r.id}")'>Delete</button></div></div>`).join('')||'<p class="muted">No cards.</p>';
+ $('bl').innerHTML=db.bills.map(r=>`<div class="item"><b>${esc(r.name)}</b> <span class="badge ${r.status==='Closed'?'closed':''}">${esc(r.status)}</span><br><span class="muted">${esc(r.type)} • ${esc(r.provider)} • ${money(r.amount)} • Due ${r.dueDay||'-'} • ${esc(r.frequency)}</span><div class="row"><button onclick='editBill(${JSON.stringify(r)})'>Edit</button><button class="g" onclick='pay("bill",db.bills.find(x=>x.id=="${r.id}"))'>Mark Paid</button>${r.status==='Active'?`<button class="s" onclick='closeItem("Bills","bills","${r.id}")'>Close</button>`:''}<button class="d" onclick='remove("Bills","bills","${r.id}")'>Delete</button></div></div>`).join('')||'<p class="muted">No bills.</p>';
+ let h=[...db.income.map(x=>({...x,t:'Income'})),...db.tx.map(x=>({...x,t:'Expense'})),...db.loanPayments.map(x=>({...x,t:'Loan Payment'})),...db.cardPayments.map(x=>({...x,t:'Card Payment'})),...db.billPayments.map(x=>({...x,t:'Bill Payment'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ $('hi').innerHTML=h.map(x=>`<div class="item"><b>${x.t}</b> • ${esc(x.date)}<br>${money(x.amount)} <span class="muted">${esc(x.description||x.source||x.notes||'')} ${x.paymentMode?'• '+esc(x.paymentMode):''}</span></div>`).join('')||'No history.';
+ draw();
+}
+function draw(){let c=$('chart'),x=c.getContext('2d'),w=c.width,h=c.height;x.clearRect(0,0,w,h);let m={};let ym=new Date().toISOString().slice(0,7);db.tx.filter(r=>String(r.date).slice(0,7)===ym).forEach(r=>m[r.category]=(m[r.category]||0)+(+r.amount||0));let v=Object.entries(m).slice(0,8),mx=Math.max(1,...v.map(a=>a[1])),bw=w/(v.length||1)*.6;x.font='12px Arial';v.forEach((a,i)=>{let bh=a[1]/mx*(h-55),px=i*w/(v.length||1)+bw*.3;x.fillStyle='#1565c0';x.fillRect(px,h-30-bh,bw,bh);x.fillStyle='#18212b';x.fillText(a[0].slice(0,11),px,h-10);x.fillText(Math.round(a[1]),px,h-34-bh)})}
+function api(){return localStorage.getItem(A)||$('url').value.trim()}function saveurl(){localStorage.setItem(A,$('url').value.trim());$('msg').textContent='URL saved.'}
+function req(p){return new Promise((resolve,reject)=>{let u=api();if(!u)return reject(Error('Save the /exec URL first'));let cb='cb'+Date.now()+Math.random().toString(36).slice(2);window[cb]=r=>{delete window[cb];try{resolve(JSON.parse(r))}catch(e){reject(e)}};AndroidBridge.post(u,JSON.stringify(p),cb);setTimeout(()=>{if(window[cb]){delete window[cb];reject(Error('Request timed out'))}},35000)})}
+async function setup(){try{$('msg').textContent='Creating/repairing sheets...';let r=await req({action:'setup'});$('msg').textContent=r.ok?'Sheets are ready.':'Error: '+r.error}catch(e){$('msg').textContent='Error: '+e.message}}
 async function sync(){try{$('msg').textContent='Syncing...';let r=await req({action:'listAll'});if(!r.ok)throw Error(r.error);let d=r.data||{};db.tx=d.Expenses||[];db.income=d.Income||[];db.loans=d.Loans||[];db.loanPayments=d.LoanPayments||[];db.cards=d.CreditCards||[];db.cardPayments=d.CardPayments||[];db.bills=d.Bills||[];db.billPayments=d.BillPayments||[];save();$('msg').textContent='Sync successful.'}catch(e){$('msg').textContent='Sync error: '+e.message}}
-async function cloud(sheet,r){if(!api())return;try{await req({action:'upsert',sheet,record:r})}catch(e){console.log(e)}} async function delcloud(sheet,id){if(!api())return;try{await req({action:'delete',sheet,id})}catch(e){console.log(e)}}
-function backup(){let b=new Blob([JSON.stringify(db)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mybudget-v5-2-backup.json';a.click()}
+async function cloud(sheet,r){if(!api())return;try{await req({action:'upsert',sheet,record:r})}catch(e){console.log(e)}}async function delcloud(sheet,id){if(!api())return;try{await req({action:'delete',sheet,id})}catch(e){console.log(e)}}
+function carry(){let key='carry-'+new Date().getFullYear()+'-'+(new Date().getMonth()+1),done=localStorage.getItem(key);if(done){alert('This month has already been carried forward.');return}let n=0;db.bills.filter(b=>b.status==='Active'&&b.autoCarryForward).forEach(b=>{let r={...b,id:uid('bill'),notes:'Carried forward from '+b.name,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};db.bills.push(r);cloud('Bills',r);n++});localStorage.setItem(key,'1');save();alert(n+' active bill(s) carried forward.')}
+function backup(){let b=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mybudget-v5-2-1-backup.json';a.click()}
 function restore(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let r=new FileReader();r.onload=()=>{db=JSON.parse(r.result);save()};r.readAsText(i.files[0])};i.click()}
 $('url').value=localStorage.getItem(A)||'';render();
 </script></body></html>

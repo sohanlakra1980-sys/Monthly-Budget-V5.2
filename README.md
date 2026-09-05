@@ -1,26 +1,16 @@
-# My Budget V5.2 — Android Project (V4-Compatible Install)
+# My Budget V5.2.1
 
-This version uses a unique Android application ID:
-`com.sohanlakra.mybudget.v52`
+UI/feature refinement of V5.2.
 
-This is intentional so it can be installed **alongside the existing V4 app** without the package/signing conflict shown when installing the first V5.2 APK.
+- Fixes mobile navigation clipping
+- Adds dedicated Income and Expense screens
+- Adds payment-mode selection
+- Edit / Close / Delete for loans, cards and bills
+- Separate payment history
+- Monthly spending chart
+- Active bill carry-forward
+- Google Sheets sync through native Android bridge
+- Keeps V4-compatible unique package `com.sohanlakra.mybudget.v52`
 
-Features:
-- Dashboard and monthly category chart
-- Multiple loans and loan payment history
-- Multiple credit cards and payment history
-- Multiple named bills/recurring expenses
-- Local backup/restore
-- Google Sheets sync through a native Android bridge
-- No PWA installation/status panels
-
-Google Apps Script:
-- `Code_V5_2.gs` is in the project root.
-- Use your Apps Script `/exec` URL in Settings → Google Sheets Sync.
-
-Build:
-GitHub → Actions → Build My Budget V5.2 APK → Run workflow.
-Download `MyBudgetV5.2-debug-apk`.
-
-IMPORTANT:
-Do NOT uninstall V4. This V5.2 build is designed to coexist with V4.
+Build with GitHub Actions workflow:
+`Build My Budget V5.2 APK`
