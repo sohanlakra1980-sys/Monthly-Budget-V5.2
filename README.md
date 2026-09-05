@@ -1,21 +1,9 @@
-# My Budget V5.2.1 — Unique Package Build
+# My Budget V5.3
 
-This build uses a completely unique Android package:
-`com.sohanlakra.mybudget.v521`
+Monthly personal finance manager with Google Sheets sync.
 
-It is designed to avoid conflicts with older V4/V5.2 APKs.
+Features: month selector, monthly income/expense/balance, category budgets, budget-vs-actual view, loan outstanding estimate, credit-card linked expenses and utilization, bill due/paid status, searchable history, backup/restore, and native Android Google Sheets sync.
 
-Features:
-- Fixed mobile navigation
-- Income and Expense screens
-- Payment modes
-- Multiple loans: Edit / Pay EMI / Close / Delete
-- Multiple credit cards: Edit / Pay / Close / Delete
-- Multiple bills: Edit / Mark Paid / Close / Delete
-- Monthly spending chart
-- Payment and expense history
-- Bill carry-forward
-- Google Sheets sync via native Android bridge
-- Backup/restore
+Backend: `Code_V5_3.gs`. Deploy it as a new Apps Script Web App, then use its `/exec` URL in Settings. It preserves the existing tabs and adds `BudgetCategories`.
 
-Do not uninstall V4 or V5.2 before installing this build.
+Package: `com.sohanlakra.mybudget.v53` so it can coexist with V4, V5.2 and V5.2.1.

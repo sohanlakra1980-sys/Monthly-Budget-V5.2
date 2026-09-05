@@ -1,7 +1,7 @@
 <!doctype html>
 <html><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>My Budget V5.2.1</title>
+<title>My Budget V5.3</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6f8;color:#18212b}
 header{background:#1565c0;color:#fff;padding:16px 16px 13px;position:sticky;top:0;z-index:20}
@@ -20,17 +20,18 @@ input,select,textarea{width:100%;padding:11px;margin:5px 0 9px;border:1px solid 
 .badge.closed{background:#eceff1;color:#546e7a}.muted{color:#687681;font-size:13px}.ok{color:#2e7d32}.err{color:#c62828}
 canvas{width:100%;height:220px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:8px}
 label.check{display:flex;gap:8px;align-items:center;margin:4px 0 10px}.check input{width:auto;margin:0}
+.progress{height:9px;background:#e9edf0;border-radius:8px;overflow:hidden}.progress i{display:block;height:100%;background:#1565c0}.section-title{display:flex;justify-content:space-between;align-items:center;gap:8px}
 </style></head>
 <body>
-<header><h1>My Budget V5.2.1</h1><small>Finance Hub • Google Sheets</small></header>
+<header><h1>My Budget V5.3</h1><small>Personal Finance Hub • Google Sheets</small></header>
 <nav class="nav">
-<button onclick="tab('home')">Home</button><button onclick="tab('income')">Income</button><button onclick="tab('expense')">Expense</button>
+<button onclick="tab('home')">Home</button><button onclick="tab('income')">Income</button><button onclick="tab('expense')">Expense</button><button onclick="tab('budget')">Budget</button>
 <button onclick="tab('loans')">Loans</button><button onclick="tab('cards')">Cards</button><button onclick="tab('bills')">Bills</button>
 <button onclick="tab('history')">History</button><button onclick="tab('settings')">Settings</button>
 </nav>
 <div class="wrap">
 
-<section id="home">
+<section id="home"><div class="card"><div class="row" style="align-items:center"><button onclick="changeMonth(-1)">‹</button><input id="monthSel" type="month" onchange="changeMonth(0)" style="margin:0;flex:3"><button onclick="changeMonth(1)">›</button></div></div>
 <div class="grid">
 <div class="stat">Income<b id="inc">₹0</b></div><div class="stat">Expenses<b id="exp">₹0</b></div>
 <div class="stat">Balance<b id="bal">₹0</b></div><div class="stat">EMI + Bills<b id="commit">₹0</b></div>
@@ -50,6 +51,8 @@ label.check{display:flex;gap:8px;align-items:center;margin:4px 0 10px}.check inp
 <input id="ec2" placeholder="Category" required><input id="ea2" type="number" step=".01" placeholder="Amount" required><input id="ed2" placeholder="Description">
 <select id="ep2"><option>Cash</option><option>UPI</option><option>Debit Card</option><option>Credit Card</option><option>Bank Transfer</option><option>Other</option></select>
 <input id="edate2" type="date"><button>Add Expense</button></form></div></section>
+
+<section id="budget" class="hidden"><div class="card"><h2>Monthly Category Budget</h2><p class="muted">Set a budget for each category for the selected month.</p><form onsubmit="saveBudget(event)"><input type="hidden" id="bid"><input id="bcat" placeholder="Category e.g. Groceries" required><input id="bamt" type="number" step=".01" placeholder="Monthly budget" required><button>Save Budget</button></form></div><div class="card"><div id="budgetList"></div></div></section>
 
 <section id="loans" class="hidden"><div class="card"><h2>Loans</h2><form onsubmit="loan(event)">
 <input type="hidden" id="li"><input id="ln" placeholder="Loan name — Personal Loan 1 / Home Loan" required><input id="lt" placeholder="Type">
@@ -71,7 +74,7 @@ label.check{display:flex;gap:8px;align-items:center;margin:4px 0 10px}.check inp
 <label class="check"><input id="bc" type="checkbox" checked> Auto carry-forward</label>
 <div class="row"><button>Save Bill</button><button type="button" class="s" onclick="clearBill()">Clear</button></div></form></div><div id="bl"></div></section>
 
-<section id="history" class="hidden"><div class="card"><h2>Payment & Expense History</h2><div id="hi"></div></div></section>
+<section id="history" class="hidden"><div class="card"><div class="section-title"><h2>Payment & Expense History</h2><input id="histSearch" placeholder="Search" oninput="render()" style="max-width:180px"></div><div id="hi"></div></div></section>
 
 <section id="settings" class="hidden"><div class="card"><h2>Google Sheets Sync</h2>
 <p class="muted">Paste the Apps Script Web App URL ending in <b>/exec</b>.</p>
@@ -127,4 +130,13 @@ function carry(){let key='carry-'+new Date().getFullYear()+'-'+(new Date().getMo
 function backup(){let b=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mybudget-v5-2-1-backup.json';a.click()}
 function restore(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let r=new FileReader();r.onload=()=>{db=JSON.parse(r.result);save()};r.readAsText(i.files[0])};i.click()}
 $('url').value=localStorage.getItem(A)||'';render();
+
+let v53Month=localStorage.getItem('mybudget-v53-month')||new Date().toISOString().slice(0,7);
+function mOf(x){return String(x||'').slice(0,7)}
+function changeMonth(n){if(n===0){v53Month=$('monthSel').value||v53Month}else{let d=new Date(v53Month+'-01');d.setMonth(d.getMonth()+n);v53Month=d.toISOString().slice(0,7)}localStorage.setItem('mybudget-v53-month',v53Month);render()}
+function saveBudget(e){e.preventDefault();let r={id:$('bid').value||uid('bud'),month:v53Month,category:$('bcat').value,budget:+$('bamt').value||0,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};db.budgets=db.budgets||[];up(db.budgets,r);save();cloud('BudgetCategories',r);e.target.reset()}
+function editBudget(r){$('bid').value=r.id;$('bcat').value=r.category;$('bamt').value=r.budget;tab('budget')}
+function budgetRows(){let a={};(db.tx||[]).filter(x=>mOf(x.date)===v53Month).forEach(x=>a[x.category]=(a[x.category]||0)+(+x.amount||0));let b=(db.budgets||[]).filter(x=>x.month===v53Month);return b.map(r=>{let used=a[r.category]||0,p=r.budget?Math.min(100,used/r.budget*100):0;return `<div class="item"><b>${esc(r.category)}</b> — ${money(used)} / ${money(r.budget)}<div class="progress"><i style="width:${p}%"></i></div><button onclick='editBudget(${JSON.stringify(r)})'>Edit</button> <button class="d" onclick='remove("BudgetCategories","budgets","${r.id}")'>Delete</button></div>`}).join('')||'<p class="muted">No budgets set for this month.</p>'}
+function renderV53(){if($('monthSel'))$('monthSel').value=v53Month;db.budgets=db.budgets||[];let inc=(db.income||[]).filter(x=>mOf(x.date)===v53Month).reduce((a,x)=>a+(+x.amount||0),0),exp=(db.tx||[]).filter(x=>mOf(x.date)===v53Month).reduce((a,x)=>a+(+x.amount||0),0);if($('inc'))$('inc').textContent=money(inc);if($('exp'))$('exp').textContent=money(exp);if($('bal'))$('bal').textContent=money(inc-exp);if($('budgetList'))$('budgetList').innerHTML=budgetRows();if($('histSearch')){let q=$('histSearch').value.toLowerCase();let all=[...(db.tx||[]).map(x=>({...x,t:'Expense'})),...(db.income||[]).map(x=>({...x,t:'Income'})),...(db.loanPayments||[]).map(x=>({...x,t:'Loan Payment'})),...(db.cardPayments||[]).map(x=>({...x,t:'Card Payment'})),...(db.billPayments||[]).map(x=>({...x,t:'Bill Payment'}))].filter(x=>mOf(x.date)===v53Month&&JSON.stringify(x).toLowerCase().includes(q)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));$('hi').innerHTML=all.map(x=>`<div class="item"><b>${x.t}</b> • ${esc(x.date)} • ${money(x.amount)}<br><span class="muted">${esc(x.description||x.source||x.notes||'')} ${x.paymentMode?'• '+esc(x.paymentMode):''}</span></div>`).join('')||'<p class="muted">No transactions for this month.</p>'}}
+const _render=render;render=function(){_render();renderV53()};
 </script></body></html>
