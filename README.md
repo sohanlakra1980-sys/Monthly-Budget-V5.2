@@ -1,16 +1,21 @@
-# My Budget V5.2.1
+# My Budget V5.2.1 — Unique Package Build
 
-UI/feature refinement of V5.2.
+This build uses a completely unique Android package:
+`com.sohanlakra.mybudget.v521`
 
-- Fixes mobile navigation clipping
-- Adds dedicated Income and Expense screens
-- Adds payment-mode selection
-- Edit / Close / Delete for loans, cards and bills
-- Separate payment history
+It is designed to avoid conflicts with older V4/V5.2 APKs.
+
+Features:
+- Fixed mobile navigation
+- Income and Expense screens
+- Payment modes
+- Multiple loans: Edit / Pay EMI / Close / Delete
+- Multiple credit cards: Edit / Pay / Close / Delete
+- Multiple bills: Edit / Mark Paid / Close / Delete
 - Monthly spending chart
-- Active bill carry-forward
-- Google Sheets sync through native Android bridge
-- Keeps V4-compatible unique package `com.sohanlakra.mybudget.v52`
+- Payment and expense history
+- Bill carry-forward
+- Google Sheets sync via native Android bridge
+- Backup/restore
 
-Build with GitHub Actions workflow:
-`Build My Budget V5.2 APK`
+Do not uninstall V4 or V5.2 before installing this build.

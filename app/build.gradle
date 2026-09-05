@@ -4,7 +4,7 @@ android {
     namespace 'com.sohanlakra.mybudget'
     compileSdk 35
     defaultConfig {
-        applicationId 'com.sohanlakra.mybudget.v52'
+        applicationId 'com.sohanlakra.mybudget.v521'
         minSdk 23
         targetSdk 35
         versionCode 521
