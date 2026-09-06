@@ -1,14 +1,13 @@
-# My Budget V5.3.1
+# My Budget V5.3.1 — Unique Package
 
-UI/configuration update for My Budget V5.3.
+This build contains the V5.3.1 category dropdown and budget progress-bar color improvements.
 
-- Expense and Quick Expense now use a predefined Category dropdown.
-- Selecting Other reveals a custom category field.
-- Monthly Budget uses the same category selector.
-- Budget bars: Green <80%, Orange 80–100%, Red >100%.
-- Selected month controls budget/expense calculations.
-- Google Sheets sync remains enabled.
-- Package: com.sohanlakra.mybudget.v53
-- Version: 5.3.1
+Android package:
+`com.sohanlakra.mybudget.v531`
 
-Use Code_V5_3.gs for the V5.3 backend.
+Version:
+`5.3.1`
+
+The unique package is intentional: Android cannot update an installed V5.3 APK when it was signed with a different debug key. This build can coexist with V5.3.
+
+Google Sheets backend remains V5.3-compatible.
